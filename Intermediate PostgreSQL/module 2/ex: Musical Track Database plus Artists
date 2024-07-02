@@ -1,0 +1,70 @@
+DROP TABLE IF EXISTS album CASCADE;
+CREATE TABLE album (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(128) UNIQUE
+);
+
+DROP TABLE IF EXISTS artist CASCADE;
+CREATE TABLE artist (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128) UNIQUE
+);
+
+DROP TABLE IF EXISTS track CASCADE;
+CREATE TABLE track (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(128),
+    album_id INTEGER REFERENCES album(id) ON DELETE CASCADE,
+    count INTEGER,
+    rating INTEGER,
+    len INTEGER
+);
+
+DROP TABLE IF EXISTS tracktoartist CASCADE;
+CREATE TABLE tracktoartist (
+    id SERIAL PRIMARY KEY,
+    track_id INTEGER REFERENCES track(id) ON DELETE CASCADE,
+    artist_id INTEGER REFERENCES artist(id) ON DELETE CASCADE
+);
+
+CREATE TEMP TABLE trash_track (
+    title VARCHAR(128),
+    artist VARCHAR(128),
+    album VARCHAR(128),
+    count INTEGER,
+    rating INTEGER,
+    len INTEGER
+);
+
+\copy trash_track(title, artist, album, count, rating, len) FROM '/Users/admin_91/Downloads/library (1).csv' WITH DELIMITER ',' CSV;
+
+INSERT INTO album (title)
+SELECT DISTINCT album FROM trash_track;
+
+INSERT INTO artist (name)
+SELECT DISTINCT artist FROM trash_track;
+
+INSERT INTO track (title, album_id, count, rating, len)
+SELECT tt.title, a.id AS album_id, tt.count, tt.rating, tt.len
+FROM trash_track tt
+JOIN album a ON tt.album = a.title;
+
+INSERT INTO tracktoartist (track_id, artist_id)
+SELECT t.id AS track_id, ar.id AS artist_id
+FROM trash_track tt
+JOIN track t ON tt.title = t.title
+JOIN album a ON tt.album = a.title
+JOIN artist ar ON tt.artist = ar.name;
+
+DROP TABLE IF EXISTS trash_track;
+
+ALTER TABLE track DROP COLUMN album;
+ALTER TABLE tracktoartist DROP COLUMN track;
+
+SELECT t.title AS track_title, al.title AS album_title, ar.name AS artist_name
+FROM track t
+JOIN album al ON t.album_id = al.id
+JOIN tracktoartist tta ON t.id = tta.track_id
+JOIN artist ar ON tta.artist_id = ar.id
+ORDER BY t.title
+LIMIT 3;

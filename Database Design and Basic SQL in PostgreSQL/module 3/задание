@@ -1,4 +1,4 @@
--- Creating the make table
+
 CREATE TABLE make (
     id SERIAL,
     name VARCHAR(128) UNIQUE,
