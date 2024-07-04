@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS bigtext;
+CREATE TABLE bigtext (
+    content TEXT
+);
+
+INSERT INTO bigtext (content)
+SELECT generate_series(100000, 199999)::TEXT;

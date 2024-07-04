@@ -1,0 +1,59 @@
+def generate_random_string(min_length, max_length)
+  length = rand(min_length..max_length)
+  random_string = ""
+  length.times do
+    random_string << ('a'..'z').to_a.sample
+  end
+  random_string
+end
+
+def find_hash_collision
+
+  string1 = generate_random_string(3, 10)
+
+  string2 = string1.chars.shuffle.join
+  
+
+  hv1 = compute_hash(string1)
+  hv2 = compute_hash(string2)
+  
+  if hv1 == hv2
+    return [string1, string2]
+  else
+    return nil
+  end
+end
+
+def compute_hash(txt)
+  hv = 0
+  pos = 0
+  txt.each_char do |let|
+    pos = (pos % 3) + 1
+    hv = (hv + (pos * let.ord)) % 1000000
+  end
+  hv
+end
+
+def generate_random_string(min_length, max_length)
+  length = rand(min_length..max_length)
+  random_string = ""
+  length.times do
+    random_string << ('a'..'z').to_a.sample
+  end
+  random_string
+end
+
+t = true
+while t
+  collision = find_hash_collision
+  if collision
+    string1, string2 = collision
+    puts "Collision found!"
+    puts "String 1: '#{string1}'"
+    puts "String 2: '#{string2}'"
+    t = false if string1 != string2
+  else
+    # puts "No collision found."
+    
+  end
+end
